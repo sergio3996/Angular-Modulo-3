@@ -19,16 +19,36 @@ import { LoginComponent } from './components/login/login.component';
 import { ProtectedComponent } from './components/protected/protected.component';
 import { AuthService } from './services/auth.service';
 import { UsuarioLogueadoGuard } from './guards/usuario-logueado/usuario-logueado.guard';
+import { VentasComponent } from './components/ventas/ventas/ventas.component';
+import { VentasMainComponent } from './components/ventas/ventas-main/ventas-main.component';
+import { VentasMasInfoComponent } from './components/ventas/ventas-mas-info/ventas-mas-info.component';
+import { VentasDetalleComponent } from './components/ventas/ventas-detalle/ventas-detalle.component';
+
+
+export const childrenRoutesVentas: Routes = [
+  { path: '', redirectTo: 'main', pathMatch: 'full' },
+  { path: 'main', component: VentasMainComponent },
+  { path: 'mas-info', component: VentasMainComponent },
+  { path: ':id', component: VentasDetalleComponent },
+];
+
+
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
     { path: 'home', component: ListaFrutasComponent },
-    { path: 'destino/:id', component: FrutaDetalleComponent },
+    { path: 'fruta', component: FrutaDetalleComponent },
     { path: 'login', component: LoginComponent },
     {
       path: 'protected',
       component: ProtectedComponent,
       canActivate: [ UsuarioLogueadoGuard ]
+    },
+    {
+      path: 'ventas',
+      component: VentasComponent,
+      canActivate: [ UsuarioLogueadoGuard ],
+      children: childrenRoutesVentas
     }
 ]
 
@@ -56,7 +76,11 @@ let reducersInitialState = {
     FrutaDetalleComponent,
     FormFrutaFavoritaComponent,
     LoginComponent,
-    ProtectedComponent
+    ProtectedComponent,
+    VentasComponent,
+    VentasMainComponent,
+    VentasMasInfoComponent,
+    VentasDetalleComponent
   ],
   imports: [
     BrowserModule,
