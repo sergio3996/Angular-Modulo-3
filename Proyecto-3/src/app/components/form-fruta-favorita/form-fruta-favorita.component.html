@@ -1,0 +1,26 @@
+<form class="form-signin" [formGroup]="fg"
+    (ngSubmit)="guardar(fg.controls['nombre'].value,fg.controls['url'].value,fg.controls['color'].value)">
+    <div class="form-label-group">
+        <input type="text" class="form-control" placeholder="Nombre Fruta" id="nombre" formControlName="nombre">
+        <div *ngIf="fg.controls['nombre'].hasError('required')">Nombre de fruta Requerido!</div>
+        <div *ngIf="fg.controls['nombre'].hasError('invalidNombre')">Nombre de fruta Invalido!</div>
+        <div *ngIf="fg.controls['nombre'].hasError('minLongNombre')">Nombre de fruta debe tener al menos {{minLongitud}} de
+            largo!</div>
+    </div><br>
+
+    <div class="form-label-group">
+        <input type="url" class="form-control" placeholder="URL Imagen" id="url" formControlName="url">
+    </div><br>
+
+    <div class="">
+        <label class="form-label-group">Color</label>
+        <input type="color" class="form-control form-control-color" placeholder="Color" id="color"
+            formControlName="color">
+    </div><br>
+
+
+
+    <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit" *ngIf="fg.valid">Agregar
+        Fruta</button>
+
+</form>

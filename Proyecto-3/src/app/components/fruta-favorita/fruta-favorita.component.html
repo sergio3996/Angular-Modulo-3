@@ -1,0 +1,17 @@
+<div class="card border border-dark" style="width: 18rem;">
+  <img class="card-img-top" src="https://www.vegaffinity.com/comunidad/imagenes/articles/4081479122937.jpg"
+    alt="Fruta" />
+  <div class="card-body">
+    <h5 class="card-title text-uppercase">{{fruta.nombre}}</h5>
+    <div>
+      <a href="#" (click)="voteUp()" class="material-icons md-18">thumb_up</a>
+      <a href="#" (click)="voteDown()" class="material-icons md-18">thumb_down</a>
+      {{fruta.votes}}
+    </div><br>
+    <a href="#" class="btn btn-secondary" (click)="Ir()">Ir!</a>
+    <span *ngIf="fruta.isSelected()">
+      <span ngNonBindable> - PREFERIDO </span>
+      </span>
+    <a [routerLink]="['/fruta']">Ver Detalles!</a>
+  </div>
+</div><br>
