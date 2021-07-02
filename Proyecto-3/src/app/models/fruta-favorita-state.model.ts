@@ -4,6 +4,7 @@ import { Actions, createEffect, Effect, ofType } from '@ngrx/effects';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { FrutaFavorita } from './fruta-favorita.model';
+import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http'
 
 //ESTADO
 export interface FrutaFavoritaState {
@@ -12,7 +13,7 @@ export interface FrutaFavoritaState {
 	favorito: FrutaFavorita;
 }
 
-export const initializeFrutasFavoritasState = function () {
+export function initializeFrutasFavoritasState() {
 	return {
 		items: [],
 		loading: false,
@@ -25,7 +26,9 @@ export enum FrutaFavoritaActionTypes {
 	NUEVA_FRUTA = '[Fruta Favorita] Nuevo',
 	ELEGIDA_FAVORITA = '[Fruta Favorita] Favorito',
 	VOTE_UP = '[Fruta Favorita] Vote Up',
-	VOTE_DOWN = '[Fruta Favorita] Vote Down'
+	VOTE_DOWN = '[Fruta Favorita] Vote Down',
+	INIT_MY_DATA = '[Fruta Favorita] Init My Data'
+
 }
 
 export class NuevaFrutaAction implements Action {
@@ -48,7 +51,12 @@ export class VoteDownAction implements Action {
 	constructor(public fruta: FrutaFavorita) { }
 }
 
-export type FrutaFavoritaActions = NuevaFrutaAction | ElegidaFavoritaAction | VoteUpAction | VoteDownAction;
+export class InitMyDataAction implements Action {
+	type = FrutaFavoritaActionTypes.INIT_MY_DATA;
+	constructor(public frutas: string[]) {}
+  }
+
+export type FrutaFavoritaActions = NuevaFrutaAction | ElegidaFavoritaAction | VoteUpAction | VoteDownAction | InitMyDataAction;
 
 //REDUCERS
 export function reducerFrutasFavoritas(
@@ -56,6 +64,13 @@ export function reducerFrutasFavoritas(
 	action: FrutaFavoritaActions
 ): FrutaFavoritaState {
 	switch (action.type) {
+		case FrutaFavoritaActionTypes.INIT_MY_DATA: {
+			const frutas: string[] = (action as InitMyDataAction).frutas;
+			return {
+				...state,
+				items: frutas.map((f) => new FrutaFavorita(f, "", ""))
+			  };
+		  }
 		case FrutaFavoritaActionTypes.NUEVA_FRUTA: {
 			return {
 				...state,

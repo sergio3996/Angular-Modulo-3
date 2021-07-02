@@ -9,7 +9,8 @@ import { ElegidaFavoritaAction, NuevaFrutaAction } from './../../models/fruta-fa
 @Component({
   selector: 'app-lista-frutas',
   templateUrl: './lista-frutas.component.html',
-  styleUrls: ['./lista-frutas.component.css']
+  styleUrls: ['./lista-frutas.component.css'],
+  providers: [FrutasApiClient]
 })
 export class ListaFrutasComponent implements OnInit {
   @Output() onItemAdded: EventEmitter<FrutaFavorita>
@@ -34,7 +35,9 @@ export class ListaFrutasComponent implements OnInit {
 
   agregado(f: FrutaFavorita) {
     
-    this.store.dispatch(new NuevaFrutaAction(f));
+    this.frutasApiClient.add(f)
+    
+    this.onItemAdded.emit(f)
   }
 
   elegido(f: FrutaFavorita){
