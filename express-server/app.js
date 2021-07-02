@@ -15,6 +15,3 @@ app.post("/my", (req, res, next) => {
   res.json(misFrutas);
 });
 
-
-// var ciudades = [ "Banana", "Manzana", "Durazno", "Pera", "Kiwi", "Melon", "Nueva York" ];
-// app.get("/ciudades", (req, res, next) => res.json(ciudades.filter((c)=> c.toLowerCase().indexOf(req.query.q.toString().toLowerCase()) > -1)));
