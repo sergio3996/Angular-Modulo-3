@@ -2,6 +2,9 @@
     (ngSubmit)="guardar(fg.controls['nombre'].value,fg.controls['url'].value,fg.controls['color'].value)">
     <div class="form-label-group">
         <input type="text" class="form-control" placeholder="Nombre Fruta" id="nombre" formControlName="nombre">
+        <ul>
+    		<li *ngFor="let r of searchResults;">{{r}}</li>
+		</ul>
         <div *ngIf="fg.controls['nombre'].hasError('required')">Nombre de fruta Requerido!</div>
         <div *ngIf="fg.controls['nombre'].hasError('invalidNombre')">Nombre de fruta Invalido!</div>
         <div *ngIf="fg.controls['nombre'].hasError('minLongNombre')">Nombre de fruta debe tener al menos {{minLongitud}} de

@@ -1,0 +1,7 @@
+<p>pedidos-listado works!</p>
+  <a [routerLink]="['./', 10]">Ir a detalle</a>
+  <a [routerLink]="['/login']">Ir a login</a>
+  
+  <div *ngFor="let p of api.getAll()">
+    {{p.id}} - {{p.name}}
+  </div>

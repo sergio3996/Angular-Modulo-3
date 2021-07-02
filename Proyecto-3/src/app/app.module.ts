@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { InjectionToken, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { RouterModule, Routes } from '@angular/router'
@@ -23,6 +23,7 @@ import { VentasComponent } from './components/ventas/ventas/ventas.component';
 import { VentasMainComponent } from './components/ventas/ventas-main/ventas-main.component';
 import { VentasMasInfoComponent } from './components/ventas/ventas-mas-info/ventas-mas-info.component';
 import { VentasDetalleComponent } from './components/ventas/ventas-detalle/ventas-detalle.component';
+import { PedidosModule } from './pedidos/pedidos.module';
 
 
 export const childrenRoutesVentas: Routes = [
@@ -51,6 +52,17 @@ const routes: Routes = [
       children: childrenRoutesVentas
     }
 ]
+
+// app config
+export interface AppConfig {
+  apiEndpoint: String;
+}
+const APP_CONFIG_VALUE: AppConfig = {
+  apiEndpoint: 'http://localhost:3000'
+};
+export const APP_CONFIG = new InjectionToken<AppConfig>('app.config');
+// fin app config
+
 
 //redux init
 export interface AppState {
@@ -91,10 +103,11 @@ let reducersInitialState = {
       runtimeChecks: {
         strictStateImmutability: false,
         strictActionImmutability: false,
-      }})
+      }}),
+    PedidosModule
     
   ],
-  providers: [FrutasApiClient, AuthService, UsuarioLogueadoGuard],
+  providers: [FrutasApiClient, AuthService, UsuarioLogueadoGuard, { provide: APP_CONFIG, useValue: APP_CONFIG_VALUE }],
   bootstrap: [AppComponent]
 })
 
