@@ -1,27 +1,39 @@
 <div class="container content">
- <div class="page-header">
-   <div class="container">
-     <h1>Ruteo</h1>
-     <div class="navLinks">
-       <a [routerLink]="['/home']">Home</a><br>
-       <a [routerLink]="['/fruta']">Fruta</a><br>
-       <a [routerLink]="['/login']">Login</a><br>
-       <a [routerLink]="['/ventas']">Ventas</a>
+  <div class="page-header">
+    <div style="float: right;">
+      <select (change)="translate.use($event.target.value)">
+        <option value="es">Español</option>
+        <option value="fr">France</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+    <div class="container">
+      <h1>Ruteo</h1>
+      <div class="navLinks">
+        <a [routerLink]="['/home']">Home</a><br>
+        <a [routerLink]="['/fruta']">Fruta</a><br>
+        <a [routerLink]="['/login']">Login</a><br>
+        <a [routerLink]="['/ventas']">Ventas</a>
 
-     </div>
-   </div>
- </div>
- 
-  <div class="row">
-    <h1 class="text-center">{{title}}</h1>
+      </div>
+    </div>
   </div>
 
-<div class="row">
-  
-  <router-outlet></router-outlet>
-</div>
-</div>
 
-<hr class="mb-5">
+  <div class="container content">
+    <div class="row">
+      <h1>
+        {{ title }} <b [innerHTML]="'HOLA' | translate"></b>
+      </h1>
+    </div>
 
-Fecha: {{ time | async }}
+
+    <div class="row">
+
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+
+  <hr class="mb-5">
+
+  Fecha: {{ time | async }}

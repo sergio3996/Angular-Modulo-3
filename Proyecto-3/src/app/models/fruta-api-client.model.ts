@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@angular/core'
 import { FrutaFavorita } from './fruta-favorita.model';
 import { BehaviorSubject, Subject } from 'rxjs'
 import { Store } from '@ngrx/store'
-import { AppState, APP_CONFIG, AppConfig } from '../app.module';
+import { AppState, APP_CONFIG, AppConfig, db } from '../app.module';
 import { ElegidaFavoritaAction, NuevaFrutaAction } from './fruta-favorita-state.model';
 import { HttpRequest, HttpHeaders, HttpClient, HttpEvent, HttpResponse } from '@angular/common/http';
 
@@ -32,6 +32,10 @@ export class FrutasApiClient {
 		this.http.request(req).subscribe((data: HttpResponse<{}>) => {
 		  if (data.status === 200) {
 			this.store.dispatch(new NuevaFrutaAction(f));
+			const myDb = db;
+        	myDb.frutas.add(f);
+        	console.log('todas los frutas de la db!');
+        	myDb.frutas.toArray().then(frutas => console.log(frutas))
 		  }
 		});
 	  }

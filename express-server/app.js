@@ -15,6 +15,8 @@ app.post("/my", (req, res, next) => {
   res.json(misFrutas);
 });
 
-
+app.get("/api/translation", (req, res, next) => res.json([
+  {lang: req.query.lang, key: 'HOLA', value: 'HOLA ' + req.query.lang}
+]));
 
 

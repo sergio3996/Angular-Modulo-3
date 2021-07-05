@@ -5,7 +5,9 @@ import { RouterModule, Routes } from '@angular/router'
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 
-import { StoreModule as NgRxStoreModule, ActionReducerMap, Store} from '@ngrx/store'
+import Dexie from 'dexie';
+
+import { StoreModule as NgRxStoreModule, ActionReducerMap, Store } from '@ngrx/store'
 import { EffectsModule } from '@ngrx/effects';
 
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http'
@@ -26,6 +28,11 @@ import { VentasMainComponent } from './components/ventas/ventas-main/ventas-main
 import { VentasMasInfoComponent } from './components/ventas/ventas-mas-info/ventas-mas-info.component';
 import { VentasDetalleComponent } from './components/ventas/ventas-detalle/ventas-detalle.component';
 import { PedidosModule } from './pedidos/pedidos.module';
+import { FrutaFavorita } from './models/fruta-favorita.model';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { from, Observable } from 'rxjs';
+import { flatMap, concatMap } from 'rxjs/operators';
+
 
 
 // app config
@@ -49,26 +56,26 @@ export const childrenRoutesVentas: Routes = [
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-    { path: 'home', component: ListaFrutasComponent },
-    { path: 'fruta', component: FrutaDetalleComponent },
-    { path: 'login', component: LoginComponent },
-    {
-      path: 'protected',
-      component: ProtectedComponent,
-      canActivate: [ UsuarioLogueadoGuard ]
-    },
-    {
-      path: 'ventas',
-      component: VentasComponent,
-      canActivate: [ UsuarioLogueadoGuard ],
-      children: childrenRoutesVentas
-    }
+  { path: 'home', component: ListaFrutasComponent },
+  { path: 'fruta', component: FrutaDetalleComponent },
+  { path: 'login', component: LoginComponent },
+  {
+    path: 'protected',
+    component: ProtectedComponent,
+    canActivate: [UsuarioLogueadoGuard]
+  },
+  {
+    path: 'ventas',
+    component: VentasComponent,
+    canActivate: [UsuarioLogueadoGuard],
+    children: childrenRoutesVentas
+  }
 ]
 
 
 
 // app init
-export function init_app(appLoadService: AppLoadService): () => Promise<any>  {
+export function init_app(appLoadService: AppLoadService): () => Promise<any> {
   return () => appLoadService.initializeFrutasFavoritasState();
 }
 
@@ -76,7 +83,7 @@ export function init_app(appLoadService: AppLoadService): () => Promise<any>  {
 class AppLoadService {
   constructor(private store: Store<AppState>, private http: HttpClient) { }
   async initializeFrutasFavoritasState(): Promise<any> {
-    const headers: HttpHeaders = new HttpHeaders({'X-API-TOKEN': 'token-seguridad'});
+    const headers: HttpHeaders = new HttpHeaders({ 'X-API-TOKEN': 'token-seguridad' });
     const req = new HttpRequest('GET', APP_CONFIG_VALUE.apiEndpoint + '/my', { headers: headers });
     const response: any = await this.http.request(req).toPromise();
     this.store.dispatch(new InitMyDataAction(response.body));
@@ -92,13 +99,80 @@ export interface AppState {
 };
 
 const reducers: ActionReducerMap<AppState> = {
-   frutas: reducerFrutasFavoritas
+  frutas: reducerFrutasFavoritas
 };
 
 let reducersInitialState = {
-    frutas: initializeFrutasFavoritasState()
+  frutas: initializeFrutasFavoritasState()
 };
 //fin redux init
+
+// dexie db
+export class Translation {
+  constructor(public id: number, public lang: string, public key: string, public value: string) { }
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class MyDatabase extends Dexie {
+  frutas: Dexie.Table<FrutaFavorita, number>;
+  translations: Dexie.Table<Translation, number>;
+  constructor() {
+    super('MyDatabase');
+    this.version(1).stores({
+      frutas: '++id, nombre, imagenUrl'
+    });
+    this.version(2).stores({
+      frutas: '++id, nombre, imagenUrl',
+      translations: '++id, lang, key, value'
+    });
+  }
+}
+
+export const db = new MyDatabase();
+// fin dexie db
+
+// i18n ini
+class TranslationLoader implements TranslateLoader {
+  constructor(private http: HttpClient) { }
+
+  getTranslation(lang: string): Observable<any> {
+    const promise = db.translations
+      .where('lang')
+      .equals(lang)
+      .toArray()
+      .then(results => {
+        if (results.length === 0) {
+          return this.http
+            .get<Translation[]>(APP_CONFIG_VALUE.apiEndpoint + '/api/translation?lang=' + lang)
+            .toPromise()
+            .then(apiResults => {
+              db.translations.bulkAdd(apiResults);
+              return apiResults;
+            });
+        }
+        return results;
+      }).then((traducciones) => {
+        console.log('traducciones cargadas:');
+        console.log(traducciones);
+        return traducciones;
+      }).then((traducciones) => {
+        return traducciones.map((t) => ({ [t.key]: t.value }));
+      });
+    /*
+    return from(promise).pipe(
+      map((traducciones) => traducciones.map((t) => { [t.key]: t.value}))
+    );
+    */
+    return from(promise).pipe(concatMap((elems) => from(elems)));
+  }
+}
+
+function HttpLoaderFactory(http: HttpClient) {
+  return new TranslationLoader(http);
+}
+// i18n fin
 
 
 
@@ -121,19 +195,29 @@ let reducersInitialState = {
     RouterModule.forRoot(routes),
     FormsModule,
     ReactiveFormsModule,
-    NgRxStoreModule.forRoot(reducers,{ initialState: reducersInitialState,
+    NgRxStoreModule.forRoot(reducers, {
+      initialState: reducersInitialState,
       runtimeChecks: {
         strictStateImmutability: false,
         strictActionImmutability: false,
-      }}),
+      }
+    }),
     PedidosModule,
-    HttpClientModule
-    
+    HttpClientModule,
+    TranslateModule.forRoot({
+      loader: {
+          provide: TranslateLoader,
+          useFactory: (HttpLoaderFactory),
+          deps: [HttpClient]
+      }
+    })
+
   ],
-  providers: [FrutasApiClient, AuthService, UsuarioLogueadoGuard, 
-    { provide: APP_CONFIG, useValue: APP_CONFIG_VALUE }, 
+  providers: [FrutasApiClient, AuthService, UsuarioLogueadoGuard,
+    { provide: APP_CONFIG, useValue: APP_CONFIG_VALUE },
     AppLoadService,
-    { provide: APP_INITIALIZER, useFactory: init_app, deps: [AppLoadService], multi: true }],
+    { provide: APP_INITIALIZER, useFactory: init_app, deps: [AppLoadService], multi: true },
+    MyDatabase],
   bootstrap: [AppComponent]
 })
 
